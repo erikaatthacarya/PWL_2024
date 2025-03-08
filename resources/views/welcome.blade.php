@@ -10,3 +10,4 @@
         <h3>Semangat Belajar Laravel 10</h3>
     </body>
 </html>
+
