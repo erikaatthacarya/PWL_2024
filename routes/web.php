@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PhotoController; 
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +15,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/user/{name?}', function ($name='John') { 
-    return 'Nama saya '.$name; 
-}); 
+Route::get('/', [PageController::class,'index']);
+Route::get('/about', [PageController::class,'about']);
+Route::get('/articles/{id}', [PageController::class,'articles']);
+Route::resource('photos', PhotoController::class)->only([ 
+    'index', 'show' 
+    ]); 
+    Route::resource('photos', PhotoController::class)->except([ 
+    'create', 'store', 'update', 'destroy' 
+    ]); 
