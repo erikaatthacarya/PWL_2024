@@ -1,4 +1,3 @@
-<!-- View pada resources/views/hello.blade.php --> 
 <html> 
  <body> 
     <h1>Welcome to POS Home Page</h1>
