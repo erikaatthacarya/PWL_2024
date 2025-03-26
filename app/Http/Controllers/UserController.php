@@ -3,13 +3,24 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Models\UserModel;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
     public function index()
     {
-        $data = DB::select('SELECT * FROM m_user'); // Ambil semua data dari tabel
-        return view('user', ['data' => $data]);
+        $data = [
+            'level_id' => 2, 
+            'username' => 'manager_tiga',
+            'nama' => 'Manager 3',
+            'password' => Hash::make(12345)
+        ];
+        UserModel::create($data);
+        $user = UserModel::all();
+        return view('user', ['data' => $user]);
+
+        // $data = DB::select('SELECT * FROM m_user'); // Ambil semua data dari tabel
+        // return view('user', ['data' => $data]);
     }
 }
