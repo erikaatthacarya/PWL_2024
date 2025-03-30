@@ -10,17 +10,26 @@ class UserController extends Controller
 {
     public function index()
     {
-        $data = [
-            'level_id' => 2, 
-            'username' => 'manager_tiga',
-            'nama' => 'Manager 3',
-            'password' => Hash::make(12345)
-        ];
-        UserModel::create($data);
-        $user = UserModel::all();
-        return view('user', ['data' => $user]);
+        // // Mengambil satu pengguna dengan id = 1
+        // $users = UserModel::find(1);
+    
+        // // Mengubah objek menjadi array agar bisa di-loop
+        // $users = $users ? [$users] : []; // Jika tidak ditemukan, buat array kosong
+    
+        // return view('user', ['data' => $users]);
 
-        // $data = DB::select('SELECT * FROM m_user'); // Ambil semua data dari tabel
-        // return view('user', ['data' => $data]);
+        
+
+        // $user = UserModel::where('level_id', 1)->get(); // Gunakan get() agar hasilnya koleksi (array)
+        // return view('user', ['data' => $user]);    }
+
+        // $users = UserModel::where('level_id', 1)->get(); // Ambil semua data dengan level_id = 1
+        // return view('user', ['data' => $users]); 
+        
+        $user = UserModel::findOr(20, ['user_id', 'username', 'nama', 'level_id'], function () {
+            abort(404);
+        });
+        
+        return view('user', ['data' => [$user]]);
     }
 }
