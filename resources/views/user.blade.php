@@ -6,7 +6,18 @@
 <body>
     <h1>Data Pengguna</h1>
 
-    @if(!empty($data)) <!-- Cek apakah ada data -->
+    <!-- Menampilkan Jumlah Pengguna -->
+    <table border="1" cellpadding="5" cellspacing="0">
+        <tr>
+            <th>Jumlah Pengguna</th>
+        </tr>
+        <tr>
+            <td>{{ $jumlahPengguna }}</td>
+        </tr>
+    </table>
+    <br>
+
+    @if(!empty($data) && count($data) > 0) <!-- Cek apakah ada data -->
     <table border="1" cellpadding="2" cellspacing="0">
         <tr>
             <th>ID</th>

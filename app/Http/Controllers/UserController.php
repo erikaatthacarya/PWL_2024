@@ -26,10 +26,25 @@ class UserController extends Controller
         // $users = UserModel::where('level_id', 1)->get(); // Ambil semua data dengan level_id = 1
         // return view('user', ['data' => $users]); 
         
-        $user = UserModel::findOr(20, ['user_id', 'username', 'nama', 'level_id'], function () {
-            abort(404);
-        });
+        // $user = UserModel::findOr(20, ['user_id', 'username', 'nama', 'level_id'], function () {
+        //     abort(404);
+        // });
         
-        return view('user', ['data' => [$user]]);
+        // return view('user', ['data' => [$user]]);
+
+        // $user = UserModel::findOrFail(1);
+        // return view('user', ['data' => [$user]]); // Bungkus dalam array
+
+        // $user = UserModel::where('username', 'manager_tiga')->get(); // Gunakan get() agar jadi collection
+        // return view('user', ['data' => $user]);
+
+        // Ambil semua data pengguna
+        $data = UserModel::all();
+
+        // Hitung jumlah pengguna
+        $jumlahPengguna = $data->count();
+
+        // Kirim data dan jumlah pengguna ke view
+        return view('user', ['data' => $data, 'jumlahPengguna' => $jumlahPengguna]);     
     }
 }
