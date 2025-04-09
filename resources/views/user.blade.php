@@ -7,7 +7,7 @@
     <h1>Data User</h1>
 
     <!-- Menampilkan Jumlah Pengguna -->
-    <table border="1" cellpadding="5" cellspacing="0">
+    {{-- <table border="1" cellpadding="5" cellspacing="0">
         <tr>
             <th>Jumlah Pengguna</th>
         </tr>
@@ -15,7 +15,7 @@
             <td>{{ $jumlahPengguna }}</td>
         </tr>
     </table>
-    <br>
+    <br> --}}
 
     @if(!empty($data) && count($data) > 0) <!-- Cek apakah ada data -->
     <table border="1" cellpadding="2" cellspacing="0">
