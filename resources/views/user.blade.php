@@ -4,7 +4,7 @@
     <title>Data Pengguna</title>
 </head>
 <body>
-    <h1>Data Pengguna</h1>
+    <h1>Data User</h1>
 
     <!-- Menampilkan Jumlah Pengguna -->
     <table border="1" cellpadding="5" cellspacing="0">
