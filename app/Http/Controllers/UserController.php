@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\UserModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\LevelModel;
 use PhpParser\Node\Expr\Cast\Object_;
@@ -25,10 +26,12 @@ class UserController extends Controller
         ];
 
         $activeMenu = 'user';
+        $level = LevelModel::all(); //ambil data level untuk filter level
 
         return view('user.index', [
             'breadcrumb' => $breadcrumb,
             'page' => $page,
+            'level' => $level,
             'activeMenu' => $activeMenu
         ]);
     }
@@ -36,31 +39,31 @@ class UserController extends Controller
 
     // ambil data user dalam bentuk JSON untuk datatables
     
-    public function list()
-    {
-        $data = UserModel::with('level')->select('m_user.*');
-    
-        return DataTables::of($data)
-            ->addIndexColumn()
-            ->addColumn('aksi', function ($row) {
-                $show = url('/user/' . $row->user_id);
-                $edit = url('/user/' . $row->user_id . '/edit');
-                $delete = url('/user/' . $row->user_id);
-    
-                return '
-                    <a href="' . $show . '" class="btn btn-sm btn-info">Detail</a>
-                    <a href="' . $edit . '" class="btn btn-sm btn-warning">Edit</a>
-                    <form action="' . $delete . '" method="POST" style="display:inline;">
-                        ' . csrf_field() . '
-                        <input type="hidden" name="_method" value="DELETE">
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm(\'Yakin ingin dihapus?\')">Hapus</button>
-                    </form>
-                ';
-            })
-            ->rawColumns(['aksi'])
-            ->make(true);
+// Ambil data user dalam bentuk JSON untuk DataTables
+public function list(Request $request)
+{
+    $users = UserModel::select('user_id', 'username', 'nama', 'level_id')
+        ->with('level');
+
+    // Filter data user berdasarkan level_id
+    if ($request->level_id) {
+        $users->where('level_id', $request->level_id);
     }
-            //menampilkan halaman form tambah user
+
+    return DataTables::of($users)
+        ->addIndexColumn() // Menambahkan kolom index / no urut (default nama kolom: DT_RowIndex)
+        ->addColumn('aksi', function ($user) { // Menambahkan kolom aksi
+            $btn = '<a href="' . url('/user/' . $user->user_id) . '" class="btn btn-info btn-sm">Detail</a> ';
+            $btn .= '<a href="' . url('/user/' . $user->user_id . '/edit') . '" class="btn btn-warning btn-sm">Edit</a> ';
+            $btn .= '<form class="d-inline-block" method="POST" action="' . url('/user/' . $user->user_id) . '">'
+                . csrf_field() . method_field('DELETE') .
+                '<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Apakah Anda yakin menghapus data ini?\')">Delete</button></form>';
+            return $btn;
+        })
+        ->rawColumns(['aksi']) // Memberitahu bahwa kolom aksi adalah HTML
+        ->make(true);
+}
+    //menampilkan halaman form tambah user
     public function create()
     {
     $breadcrumb = (object) [
@@ -142,19 +145,19 @@ class UserController extends Controller
 
 public function update(Request $request, $id)
 {
-    $validatedData = $request->validate([
-        'username' => 'required|unique:m_user,username,' . $id . ',user_id',
-        'nama'     => 'required',
-        'level_id' => 'required'
-    ]);
+    $user = UserModel::findOrFail($id);
 
-    $user = UserModel::find($id); // ← Bagian ini
-    $password = $request->password ? bcrypt($request->password) : $user->password;
+    $request->validate([
+        'username' => 'required|unique:m_user,username,' . $id . ',user_id',
+        'nama' => 'required',
+        'level_id' => 'required|integer',
+        'password' => 'nullable|min:5'
+    ]);
 
     $user->update([
         'username' => $request->username,
         'nama' => $request->nama,
-        'password' => $password,
+        'password' => $request->filled('password') ? bcrypt($request->password) : $user->password,
         'level_id' => $request->level_id
     ]);
 
