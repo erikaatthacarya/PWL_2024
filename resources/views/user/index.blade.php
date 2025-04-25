@@ -6,6 +6,7 @@
         <h3 class="card-title">{{ $page->title }}</h3> 
         <div class="card-tools"> 
             <a class="btn btn-sm btn-primary mt-1" href="{{ url('user/create') }}">Tambah</a> 
+            <button onclick="modalAction('{{ url('user/create_ajax') }}')" class="btn btn-sm btn-success mt-1">Tambah Ajax</button>
         </div> 
     </div> 
     <div class="card-body"> 
@@ -46,6 +47,7 @@
         </table> 
     </div> 
 </div> 
+<div id="myModal" class="modal fade animate shake" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" data-width="75%" aria-hidden="true"></div> 
 @endsection 
 
 @push('css') 
@@ -54,6 +56,7 @@
 @endpush 
 
 @push('js') 
+
 <!-- jQuery & DataTables -->
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -69,8 +72,17 @@
 
 <!-- DataTables Script -->
 <script> 
-    $(document).ready(function() { 
-        var dataUser = $('#table_user').DataTable({ 
+    function modalAction(url = ''){ 
+        $('#myModal').load(url,function(){ 
+            $('#myModal').modal('show'); 
+        }); 
+    }
+    var dataUser = $('#table_user').DataTable({ 
+            $(document).ready(function() { 
+                // reload tabel saat filter level diubah
+                $('#level_id').on('change', function() {
+                    dataUser.ajax.reload();
+                });
             processing: true,
             serverSide: true,      
             ajax: { 
@@ -89,11 +101,6 @@
                 { data: "aksi", orderable: false, searchable: false }
             ]
         }); 
-
-        // reload tabel saat filter level diubah
-        $('#level_id').on('change', function() {
-            dataUser.ajax.reload();
-        });
     });
 </script> 
 @endpush
