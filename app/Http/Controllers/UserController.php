@@ -25,7 +25,7 @@ class UserController extends Controller
             'title' => 'Daftar user yang terdaftar dalam sistem'
         ];
 
-        $activeMenu = 'user';
+        $activeMenu = 'user'; // set menu yang sedang aktif
         $level = LevelModel::all(); //ambil data level untuk filter level
 
         return view('user.index', [
@@ -51,8 +51,11 @@ public function list(Request $request)
     }
 
     return DataTables::of($users)
-        ->addIndexColumn() // Menambahkan kolom index / no urut (default nama kolom: DT_RowIndex)
-        ->addColumn('aksi', function ($user) { // Menambahkan kolom aksi
+        ->addIndexColumn()
+        ->addColumn('level_nama', function ($user) {
+            return $user->level ? $user->level->level_nama : '-';
+        })
+        ->addColumn('aksi', function ($user) {
             $btn = '<a href="' . url('/user/' . $user->user_id) . '" class="btn btn-info btn-sm">Detail</a> ';
             $btn .= '<a href="' . url('/user/' . $user->user_id . '/edit') . '" class="btn btn-warning btn-sm">Edit</a> ';
             $btn .= '<form class="d-inline-block" method="POST" action="' . url('/user/' . $user->user_id) . '">'
@@ -60,7 +63,7 @@ public function list(Request $request)
                 '<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Apakah Anda yakin menghapus data ini?\')">Delete</button></form>';
             return $btn;
         })
-        ->rawColumns(['aksi']) // Memberitahu bahwa kolom aksi adalah HTML
+        ->rawColumns(['aksi'])
         ->make(true);
 }
     //menampilkan halaman form tambah user
@@ -180,5 +183,4 @@ public function destroy(string $id)
         return redirect('/user')->with('error', 'Data user gagal dihapus karena masih terdapat tabel lain yang terkait dengan data ini');
     }
 }
-
 }
