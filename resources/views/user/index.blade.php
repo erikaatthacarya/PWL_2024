@@ -56,7 +56,14 @@
 @endpush 
 
 @push('js') 
-
+<button onclick="modalAction('{{ url('user/create_ajax') }}')" ...>
+function modalAction(url) {
+    $.get(url, function(result) {
+        $('#myModal').html(result).modal('show');
+    }).fail(function(xhr) {
+        alert('Gagal mengambil data. Cek kembali URL dan koneksi.');
+    });
+}
 <!-- jQuery & DataTables -->
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -71,36 +78,37 @@
 </script>
 
 <!-- DataTables Script -->
-<script> 
-    function modalAction(url = ''){ 
-        $('#myModal').load(url,function(){ 
-            $('#myModal').modal('show'); 
-        }); 
-    }
-    var dataUser = $('#table_user').DataTable({ 
-            $(document).ready(function() { 
-                // reload tabel saat filter level diubah
-                $('#level_id').on('change', function() {
-                    dataUser.ajax.reload();
-                });
+<script>
+    $(document).ready(function() {
+        var dataUser = $('#table_user').DataTable({
             processing: true,
-            serverSide: true,      
-            ajax: { 
-                url: "{{ url('user/list') }}", 
-                type: "POST", 
-                dataType: "json",
-                data: function (d){
+            serverSide: true,
+            ajax: {
+                url: "{{ url('user/list') }}",
+                type: "POST",
+                data: function(d) {
                     d.level_id = $('#level_id').val();
                 }
             },
-            columns: [ 
-                { data: "DT_RowIndex", className: "text-center", orderable: false, searchable: false },
-                { data: "username" },
-                { data: "nama" },
-                { data: "level_nama", orderable: false, searchable: false },
-                { data: "aksi", orderable: false, searchable: false }
+            columns: [
+                { data: "DT_RowIndex", name: "DT_RowIndex", className: "text-center", orderable: false, searchable: false },
+                { data: "username", name: "username" },
+                { data: "nama", name: "nama" },
+                { data: "level_nama", name: "level_nama", orderable: false, searchable: false },
+                { data: "aksi", name: "aksi", orderable: false, searchable: false }
             ]
-        }); 
+        });
+
+        $('#level_id').on('change', function() {
+            dataUser.ajax.reload();
+        });
+
+        // CSRF Setup
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
     });
-</script> 
+</script>
 @endpush
