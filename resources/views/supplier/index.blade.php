@@ -5,8 +5,10 @@
         <div class="card-header">
             <h3 class="card-title">{{ $page->title }}</h3>
             <div class="card-tools">
-                <a class="btn btn-sm btn-primary mt-1" href="{{ url('supplier/create') }}">Tambah</a>
-                <button onclick="modalAction('{{ url('supplier/create_ajax') }}')" class="btn btn-sm btn-success mt-1">Tambah Ajax</button>
+                <button onclick="modalAction('{{ url('kategori/import') }}')" class="btn btn-sm btn-info mt-1">Import Kategori</button>
+                <a class="btn btn-sm btn-primary mt-1" href="{{ url('kategori/create') }}">Tambah</a>
+                <button onclick="modalAction('{{ url('kategori/create_ajax') }}')" class="btn btn-sm btn-success mt-1">Tambah
+                    Ajax</button>
             </div>
         </div>
 
@@ -19,22 +21,21 @@
                 <div class="alert alert-danger">{{ session('error') }}</div>
             @endif
 
-            <table class="table table-bordered table-striped table-hover table-sm" id="table_supplier">
+            <table class="table table-bordered table-striped table-hover table-sm" id="table_kategori">
                 <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Kode Supplier</th>
-                    <th>Nama Supplier</th>
-                    <th>Alamat Supplier</th>
+                    <th>Kode Kategori</th>
+                    <th>Nama Kategori</th>
                     <th>Aksi</th>
                 </tr>
                 </thead>
             </table>
         </div>
     </div>
-    <div id="myModal" class="modal fade animate shake" tabindex="-1" role="dialog" 
-        data-backdrop="static" data-keyboard="false" data-width="75%" aria-hidden="true">
-    </div>
+
+    <div id="myModal" class="modal fade animate shake" tabindex="-1" role="dialog" data- backdrop="static"
+        data-keyboard="false" data-width="75%" aria-hidden="true"></div>
 @endsection
 
 @push('css')
@@ -42,16 +43,16 @@
 
 @push('js')
     <script>
-        function modalAction(url = ''){
-            $('#myModal').load(url,function(){
+        function modalAction(url = '') {
+            $('#myModal').load(url, function() {
                 $('#myModal').modal('show');
             });
         }
         $(document).ready(function() {
-            var dataKategori = $('#table_supplier').DataTable({
+            var dataKategori = $('#table_kategori').DataTable({
                 serverSide: true, // serverSide: true, jika ingin menggunakan server side processing
                 ajax: {
-                    "url": "{{ url('supplier/list') }}",
+                    "url": "{{ url('kategori/list') }}",
                     "dataType": "json",
                     "type": "POST"
                 },
@@ -63,19 +64,13 @@
                         searchable: false
                     },
                     {
-                        data: "supplier_kode",
+                        data: "kategori_kode",
                         className: "",
                         orderable: true, // orderable: true, jika ingin kolom ini bisa diurutkan
                         searchable: true // searchable: true, jika ingin kolom ini bisa dicari
                     },
                     {
-                        data: "supplier_nama",
-                        className: "",
-                        orderable: true, // orderable: true, jika ingin kolom ini bisa diurutkan
-                        searchable: true // searchable: true, jika ingin kolom ini bisa dicari
-                    },
-                    {
-                        data: "supplier_alamat",
+                        data: "kategori_nama",
                         className: "",
                         orderable: true, // orderable: true, jika ingin kolom ini bisa diurutkan
                         searchable: true // searchable: true, jika ingin kolom ini bisa dicari

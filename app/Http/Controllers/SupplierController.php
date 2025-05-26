@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SupplierModel;
 use Illuminate\Http\Request;
+use App\Models\SupplierModel;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
 
@@ -68,7 +69,6 @@ class SupplierController extends Controller
         return view('supplier.create', ['breadcrumb' => $breadcrumb, 'activeMenu' => $activeMenu, 'page' => $page]);
     }
 
-    // Create ajax
     public function create_ajax()
     {
         return view('supplier.create_ajax');
@@ -85,13 +85,12 @@ class SupplierController extends Controller
         SupplierModel::create([
             'supplier_kode' => $request->supplier_kode,
             'supplier_nama' => $request->supplier_nama,
-            'supplier_alamat' => $request->supplier_alamat
+            'supplier_alamat' => $request->supplier_alamat,
         ]);
 
         return redirect('/supplier')->with('success', 'Data supplier berhasil ditambahkan');
     }
 
-    // Store ajax
     public function store_ajax(Request $request)
     {
         if ($request->ajax() || $request->wantsJson()) {
@@ -143,7 +142,7 @@ class SupplierController extends Controller
         $supplier = SupplierModel::find($id);
         $breadcrumb = (object) [
             'title' => 'Edit Supplier',
-            'list' => ['Home', 'Supplier', 'Edit']
+            'list' => ['Home', 'Supplier', 'Edit'],
         ];
 
         $page = (object) [
@@ -155,7 +154,6 @@ class SupplierController extends Controller
         return view('supplier.edit', ['breadcrumb' => $breadcrumb, 'activeMenu' => $activeMenu, 'page' => $page, 'supplier' => $supplier]);
     }
 
-    // Edit ajax
     public function edit_ajax(string $id)
     {
         $supplier = SupplierModel::find($id);
@@ -167,19 +165,18 @@ class SupplierController extends Controller
         $request->validate([
             'supplier_kode' => 'required|string|max:10',
             'supplier_nama' => 'required|string|max:100',
-            'supplier_alamat' => 'required'
+            'supplier_alamat' => 'required',
         ]);
 
         SupplierModel::find($id)->update([
             'supplier_kode' => $request->supplier_kode,
             'supplier_nama' => $request->supplier_nama,
-            'supplier_alamat' => $request->supplier_alamat
+            'supplier_alamat' => $request->supplier_alamat,
         ]);
 
         return redirect('/supplier')->with('success', 'Data supplier berhasil diubah');
     }
 
-    // Update ajax
     public function update_ajax(Request $request, string $id)
     {
         if ($request->ajax() || $request->wantsJson()) {
@@ -215,7 +212,6 @@ class SupplierController extends Controller
         return redirect('/');
     }
 
-    // Confirm delete
     public function confirm_ajax(string $id)
     {
         $supplier = SupplierModel::find($id);
@@ -223,7 +219,6 @@ class SupplierController extends Controller
         return view('supplier.confirm_ajax', ['supplier' => $supplier]);
     }
 
-    // Delete ajax
     public function delete_ajax(Request $request, string $id)
     {
         if ($request->ajax() || $request->wantsJson()) {
@@ -257,6 +252,55 @@ class SupplierController extends Controller
             return redirect('/supplier')->with('success', 'Data supplier berhasil dihapus');
         } catch (\Illuminate\Database\QueryException $e) {
             return redirect('/supplier')->with('error', 'Data supplier gagal dihapus karena masih terdapat tabel lain yang terkait dengan data ini');
+        }
+    }
+
+    public function import()
+    {
+        return view('supplier.import');
+    }
+
+    public function import_ajax(Request $request)
+    {
+        $rules = [
+            'file_supplier' => ['required', 'mimes:xlsx,xls', 'max:1024'],
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validasi Gagal',
+                'msgField' => $validator->errors(),
+            ]);
+        }
+
+        $file = $request->file('file_supplier');
+        $spreadsheet = IOFactory::load($file->getRealPath());
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray();
+
+        $insert = [];
+        $header = array_shift($rows); // Ambil header
+
+        foreach ($rows as $row) {
+            if (!empty($row[0])) {
+                $insert[] = [
+                    'supplier_kode' => $row[0],
+                    'supplier_nama' => $row[1],
+                    'supplier_alamat' => $row[2],
+                    'created_at' => now(),
+                ];
+            }
+        }
+
+        if (!empty($insert)) {
+            SupplierModel::insertOrIgnore($insert);
+
+            return redirect('/supplier')->with('success', 'Data supplier berhasil diimport: ' . count($insert) . ' record');
+        } else {
+            return redirect('/supplier')->with('error', 'Data Supplier Kosong');
         }
     }
 }

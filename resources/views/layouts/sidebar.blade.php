@@ -33,7 +33,13 @@
             <i class="nav-icon far fa-user"></i> 
             <p>Data User</p> 
           </a> 
-        </li> 
+        </li>
+        <li class="nav-item">
+                <a href="{{ url('/supplier') }}" class="nav-link {{ $activeMenu == 'supplier' ? 'active' : '' }}">
+                    <i class="nav-icon fa-solid fa-people-group"></i>
+                    <p>Data Supplier</p>
+                </a>
+          </li> 
         <li class="nav-header">Data Barang</li> 
         <li class="nav-item"> 
           <a href="{{ url('/kategori') }}" class="nav-link {{ (isset($activeMenu) && $activeMenu == 'kategori') ? 'active' : '' }}"> 
