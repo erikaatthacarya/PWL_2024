@@ -1,51 +1,49 @@
 @extends('layouts.template')
 
 @section('content')
-<div class="card">
-    <div class="card-header">
-        <h3 class="card-title">Daftar Barang</h3>
-        <div class="card-tools">
-            <button onclick="modalAction('{{ url('/barang/import') }}')" class="btn btn-info">Import Barang</button>
-            <a href="{{ url('/barang/create') }}" class="btn btn-primary">Tambah Data</a>
-            <button onclick="modalAction('{{ url('/barang/create_ajax') }}')" class="btn btn-success">Tambah Data (Ajax)</button>
+    <div class="card card-outline card-primary">
+        <div class="card-header">
+            <h3 class="card-title">{{ $page->title }}</h3>
+            <div class="card-tools">
+                <button onclick="modalAction('{{ url('barang/import') }}')" class="btn btn-sm btn-info mt-1">Import Barang</button>
+                <a href="{{ url('/barang/export_excel') }}" class="btn btn-sm btn-primary mt-1"><i class="fa fa-file-
+                    excel"></i> Export Barang</a>
+                <button onclick="modalAction('{{ url('barang/create_ajax') }}')" class="btn btn-sm btn-success mt-1">Tambah
+                    Ajax</button>
+            </div>
         </div>
-    </div>
 
-    <div class="card-body">
-        <!-- Filter Data -->
-        <div id="filter" class="form-horizontal filter-date p-2 border-bottom mb-2">
+        <div class="card-body">
+            @if (session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-danger">{{ session('error') }}</div>
+            @endif
+
             <div class="row">
                 <div class="col-md-12">
-                    <div class="form-group form-group-sm row text-sm mb-0">
-                        <label for="filter_kategori" class="col-md-1 col-form-label">Filter</label>
-                        <div class="col-md-3">
-                            <select name="filter_kategori" class="form-control form-control-sm filter_kategori">
+                    <div class="form-group row">
+                        <label for="kategori_id" class="col-1 control-label col-form-label">Filter:</label>
+                        <div class="col-3">
+                            <select name="kategori_id" id="kategori_id" class="form-control" required>
                                 <option value="">- Semua -</option>
-                                @foreach($kategori as $l)
-                                    <option value="{{ $l->kategori_id }}">{{ $l->kategori_nama }}</option>
+                                @foreach ($kategori as $item)
+                                    <option value="{{ $item->kategori_id }}">{{ $item->kategori_nama }}</option>
                                 @endforeach
                             </select>
+
                             <small class="form-text text-muted">Kategori Barang</small>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Flash Message -->
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-
-        @if(session('error'))
-            <div class="alert alert-danger">{{ session('error') }}</div>
-        @endif
-
-        <!-- Tabel Barang -->
-        <table class="table table-bordered table-sm table-striped table-hover" id="table-barang">
-            <thead>
+            <table class="table table-bordered table-striped table-hover table-sm" id="table_barang">
+                <thead>
                 <tr>
-                    <th>No</th>
+                    <th>ID</th>
                     <th>Kode Barang</th>
                     <th>Nama Barang</th>
                     <th>Harga Beli</th>
@@ -53,100 +51,92 @@
                     <th>Kategori</th>
                     <th>Aksi</th>
                 </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+                </thead>
+            </table>
+        </div>
     </div>
-</div>
 
-<!-- Modal -->
-<div id="myModal" class="modal fade animate shake" tabindex="-1" data-backdrop="static" data-keyboard="false" data-width="75%"></div>
+    <div id="myModal" class="modal fade animate shake" tabindex="-1" role="dialog" data- backdrop="static"
+        data-keyboard="false" data-width="75%" aria-hidden="true"></div>
 @endsection
 
+@push('css')
+@endpush
+
 @push('js')
-<script>
-    function modalAction(url = '') {
-        $('#myModal').load(url, function () {
-            $('#myModal').modal('show');
-        });
-    }
-
-    $(document).ready(function () {
-        var tableBarang = $('#table-barang').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: "{{ url('barang/list') }}",
-                type: "POST",
-                data: function (d) {
-                    d.filter_kategori = $('.filter_kategori').val();
-                }
-            },
-            columns: [
-                {
-                    data: "DT_RowIndex",
-                    className: "text-center",
-                    width: "5%",
-                    orderable: false,
-                    searchable: false
-                },
-                {
-                    data: "barang_kode",
-                    width: "10%",
-                    orderable: true,
-                    searchable: true
-                },
-                {
-                    data: "barang_nama",
-                    width: "37%",
-                    orderable: true,
-                    searchable: true
-                },
-                {
-                    data: "harga_beli",
-                    width: "10%",
-                    orderable: true,
-                    searchable: false,
-                    render: function (data) {
-                        return new Intl.NumberFormat('id-ID').format(data);
+    <script>
+        function modalAction(url = '') {
+            $('#myModal').load(url, function() {
+                $('#myModal').modal('show');
+            });
+        }
+        $(document).ready(function() {
+            var dataBarang = $('#table_barang').DataTable({
+                processing: true,
+                serverSide: true, // serverSide: true, jika ingin menggunakan server side processing
+                ajax: {
+                    "url": "{{ url('barang/list') }}",
+                    "dataType": "json",
+                    "type": "POST",
+                    "data": function (d) {
+                        d.kategori_id = $('#kategori_id').val();
                     }
                 },
-                {
-                    data: "harga_jual",
-                    width: "10%",
-                    orderable: true,
-                    searchable: false,
-                    render: function (data) {
-                        return new Intl.NumberFormat('id-ID').format(data);
+                columns: [
+                    {
+                        data: "DT_RowIndex", // nomor urut dari laravel datatable addIndexColumn()
+                        className: "text-center",
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: "barang_kode",
+                        className: "",
+                        orderable: true, // orderable: true, jika ingin kolom ini bisa diurutkan
+                        searchable: true // searchable: true, jika ingin kolom ini bisa dicari
+                    },
+                    {
+                        data: "barang_nama",
+                        className: "",
+                        orderable: true, // orderable: true, jika ingin kolom ini bisa diurutkan
+                        searchable: true // searchable: true, jika ingin kolom ini bisa dicari
+                    },
+                    {
+                        data: "harga_beli",
+                        className: "",
+                        orderable: true, // orderable: true, jika ingin kolom ini bisa diurutkan
+                        searchable: true, // searchable: true, jika ingin kolom ini bisa dicari
+                        render: function(data, type, row) {
+                            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(data);
+                        }
+                    },
+                    {
+                        data: "harga_jual",
+                        className: "",
+                        orderable: true, // orderable: true, jika ingin kolom ini bisa diurutkan
+                        searchable: true, // searchable: true, jika ingin kolom ini bisa dicari
+                        render: function(data, type, row) {
+                            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(data);
+                        }
+                    },
+                    {
+                        data: "kategori.kategori_nama",
+                        className: "",
+                        orderable: true, // orderable: true, jika ingin kolom ini bisa diurutkan
+                        searchable: true // searchable: true, jika ingin kolom ini bisa dicari
+                    },
+                    {
+                        data: "aksi",
+                        className: "",
+                        orderable: false, // orderable: true, jika ingin kolom ini bisa diurutkan
+                        searchable: false // searchable: true, jika ingin kolom ini bisa dicari
                     }
-                },
-                {
-                    data: "kategori.kategori_nama",
-                    width: "14%",
-                    orderable: true,
-                    searchable: false
-                },
-                {
-                    data: "aksi",
-                    className: "text-center",
-                    width: "14%",
-                    orderable: false,
-                    searchable: false
-                }
-            ]
-        });
+                ]
+            });
 
-        // Trigger filter saat Enter di search
-        $('#table-barang_filter input').unbind().bind('keyup', function (e) {
-            if (e.keyCode === 13) {
-                tableBarang.search(this.value).draw();
-            }
+            $('#kategori_id').on('change', function() {
+                dataBarang.ajax.reload();
+            });
         });
-
-        // Trigger filter kategori
-        $('.filter_kategori').change(function () {
-            tableBarang.draw();
-        });
-    });
-</script>
+    </script>
 @endpush
